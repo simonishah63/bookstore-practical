@@ -9,14 +9,22 @@ use App\Models\Book;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
+use Elastic\Elasticsearch\ClientBuilder;
 
 class BookRepository implements BookInterface
 {
+    /**
+     * Serach client
+     *
+     * @var bookRepository
+     */
+    public $client;
     /**
      * Constructor.
      */
     public function __construct()
     {
+        $this->client = ClientBuilder::create()->setHosts(["http://127.0.0.1:9300"])->build();
     }
 
     /**
@@ -42,11 +50,27 @@ class BookRepository implements BookInterface
     {
         $perPage = isset($perPage) ? intval($perPage) : 10;
 
-        return Book::where('title', 'like', '%' . $keyword . '%')
+        if(isset($keyword)) {
+            return Book::where('title', 'like', '%' . $keyword . '%')
             ->orWhere('author', 'like', '%' . $keyword . '%')
             ->orWhere('genre', 'like', '%' . $keyword . '%')
-            ->orderBy('isbn', 'desc')
+            ->orWhere('isbn', 'like', '%' . $keyword . '%')
             ->paginate($perPage);
+            // $params = [
+            //     'index' => 'bookstore',
+            //     'body'  => [
+            //         'query' => [
+            //             'match' => [
+            //                 'title' => $keyword,
+            //             ]
+            //         ]
+            //     ]
+            // ];
+            // $response = $this->client->search($params);
+            // return $response['hits']['hits'];
+        } else {
+            return Book::paginate($perPage);
+        }
     }
 
     /**

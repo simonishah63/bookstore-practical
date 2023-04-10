@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use \App\Models\Book;
 use Illuminate\Console\Command;
-use Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\ClientBuilder;
 use Exception;
 
 
@@ -31,14 +31,13 @@ class IndexBooks extends Command
      */
     public function handle()
     {
-        
-        
         $client = ClientBuilder::create()->setHosts(["http://127.0.0.1:9300"])->build();
         
         // $response = $client->indices()->delete([
         //     'index' => 'bookstore'
         // ]);
 
+        //print_r($response);exit;
         // Book::createIndex($shards = null, $replicas = null);
         // Book::putMapping($ignoreConflicts = true);
         //Book::getMapping();
@@ -57,16 +56,16 @@ class IndexBooks extends Command
                     ],
                     'properties' => [
                         'title' => [
-                            'type' => 'keyword'
+                            'type' => 'text'
                         ],
                         'author' => [
-                            'type' => 'keyword'
+                            'type' => 'text'
                         ],
                         'genre' => [
-                            'type' => 'keyword'
+                            'type' => 'text'
                         ],
                         'isbn' => [
-                            'type' => 'integer'
+                            'type' => 'text'
                         ]
                     ]
                 ]
@@ -74,7 +73,7 @@ class IndexBooks extends Command
         ];
         
         $response = $client->indices()->create($indexParams);
-
+    
         $books = Book::all();
 
         foreach ($books as $book) {
