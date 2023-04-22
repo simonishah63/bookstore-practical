@@ -70,7 +70,7 @@ const actions = {
     async fetchDetailBook({ commit }, id) {
         commit('setBookIsLoading', true);
         commit('setBookIsUpdating', false);
-        await axios.get(`/api/books/edit/${id}`)
+        await axios.get(`/api/books/show/${id}`)
         .then(res => {
             commit('setBookDetail', res.data.data);
             commit('setBookIsLoading', false);
@@ -82,7 +82,12 @@ const actions = {
 
     async storeBook({ commit }, book) {
         commit('setBookIsCreating', true);
-        await axios.post(`/api/books/add`, book)
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        }
+        await axios.post(`/api/books/add`, book, config)
         .then(res => {
             commit('saveNewBooks', res.data.data);
             commit('setBookIsCreating', false);
@@ -95,7 +100,12 @@ const actions = {
 
     async updateBook({ commit }, book) {
         commit('setBookIsUpdating', true);
-        await axios.post(`/api/books/update/${book.id}`, book)
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        }
+        await axios.post(`/api/books/${book.id}`, book, config)
         .then(res => {
             commit('saveUpdatedBook', res.data.data);
             commit('setBookIsUpdating', false);
@@ -109,7 +119,7 @@ const actions = {
 
     async deleteBook({ commit }, id) {
         commit('setBookIsDeleting', true);
-        await axios.delete(`/api/books/delete/${id}`)
+        await axios.delete(`/api/books/${id}`)
         .then(() => {
             commit('setDeleteBook', res.data.data.id);
             commit('setBookIsDeleting', false);
@@ -118,10 +128,6 @@ const actions = {
             commit('setBookIsDeleting', false);
         });
     },
-
-    updateBookInput({ commit }, e) {
-        commit('setBookDetailInput', e);
-    }
 }
 
 // mutations
@@ -141,12 +147,6 @@ const mutations = {
 
     setDeleteBook: (state, id) => {
         state.booksPaginatedData.data.filter(x => x.id !== id);
-    },
-
-    setBookDetailInput: (state, e) => {
-        let book = state.book;
-        book[e.target.name] = e.target.value;
-        state.book = book
     },
 
     saveNewBooks: (state, book) => {

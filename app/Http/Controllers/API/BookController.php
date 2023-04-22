@@ -69,7 +69,7 @@ class BookController extends Controller
     public function index(Request $request)
     {
         try {
-            $data = $this->bookRepository->searchBook($request->search, $request->perPage);
+            $data = $this->bookRepository->search($request->search, $request->page, $request->perPage);
             return $this->responseSuccess($data, 'Books Fetched Successfully !');
         } catch (\Exception $e) {
             return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -92,8 +92,8 @@ class BookController extends Controller
      *              @OA\Property(property="description", type="string", example="Description"),
      *              @OA\Property(property="isbn", type="number", example="12345"),
      *              @OA\Property(property="publisher", type="string", example="Books Publisher"),
-     *              OA\Property(property="published_at", type="date", example="2023-04-01"),
-     *              @OA\Property(property="image", type="string", example=""),
+     *              @OA\Property(property="published_at", type="date", example="2023-04-01"),
+     *              @OA\Property(property="uploadImage", type="string", format="binary", example=""),
      *          ),
      *      ),
      *      @OA\Response(response=200, description="Create New Book" ),
@@ -114,7 +114,7 @@ class BookController extends Controller
 
     /**
      * @OA\GET(
-     *     path="/api/books/edit/{id}",
+     *     path="/api/books/show/{id}",
      *     tags={"Books"},
      *     summary="Show Book Details",
      *     description="Show Book Details",
@@ -141,7 +141,7 @@ class BookController extends Controller
 
     /**
      * @OA\PUT(
-     *     path="/api/books/update/{id}",
+     *     path="/api/books/{id}",
      *     tags={"Books"},
      *     summary="Update Book",
      *     description="Update Book",
@@ -155,8 +155,8 @@ class BookController extends Controller
      *              @OA\Property(property="description", type="string", example="Description"),
      *              @OA\Property(property="isbn", type="number", example="12345"),
      *              @OA\Property(property="publisher", type="string", example="Books Publisher"),
-     *              OA\Property(property="published_at", type="date", example="2023-04-01"),
-     *              @OA\Property(property="image", type="string", example=""),
+     *              @OA\Property(property="published_at", type="date", example="2023-04-01"),
+     *              @OA\Property(property="uploadImage", type="string", format="binary", example=""),
      *          ),
      *      ),
      *     operationId="update",
@@ -181,7 +181,7 @@ class BookController extends Controller
 
     /**
      * @OA\DELETE(
-     *     path="/api/books/delete/{id}",
+     *     path="/api/books/{id}",
      *     tags={"Books"},
      *     summary="Delete Book",
      *     description="Delete Book",

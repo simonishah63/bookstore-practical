@@ -39,33 +39,44 @@
                                 </div>
                             </div>
                             <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label>Genre</label>
-                                        <input type="text" class="form-control" v-model="book.genre">
-                                    </div>
+                                <div class="form-group">
+                                    <label>Genre</label>
+                                    <input type="text" class="form-control" v-model="book.genre">
                                 </div>
-                                <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label>Isbn</label>
-                                        <input type="number" class="form-control" v-model="book.isbn">
-                                    </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label>Isbn</label>
+                                    <input type="number" class="form-control" v-model="book.isbn">
                                 </div>
-                                <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label>Published At</label>
-                                        <datepicker
-                                            v-model="book.published_at"
-                                            format="yyyy-MM-dd"
-                                            class="form-input form-control mb-2"
-                                        />
-                                    </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label>Published At</label>
+                                    <datepicker
+                                        v-model="book.published_at"
+                                        format="yyyy-MM-dd"
+                                        class="form-input form-control mb-2"
+                                    />
                                 </div>
-                                <div class="col-12 mb-2">
-                                    <div class="form-group">
-                                        <label>Publisher</label>
-                                        <input type="text" class="form-control" v-model="book.publisher">
-                                    </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label>Publisher</label>
+                                    <input type="text" class="form-control" v-model="book.publisher">
                                 </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="form-group">
+                                    <label>Image</label>
+                                    <input type="file" class="form-control"  @change="attachImage">
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2" v-if="imagePreview">
+                                <div class="form-group">
+                                    <img v-bind:src="imagePreview" width="100"/>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <router-link :to='{name:"listBook"}' class="btn btn-secondary mr-2">
                                     Cancel
@@ -109,8 +120,10 @@ export default {
                 isbn: '',
                 publisher: '',
                 published_at: new Date(),
+                uploadImage: '',
             },
             validationErrors: null,
+            imagePreview: null,
         }
     },
     components: {
@@ -142,6 +155,25 @@ export default {
                 this.validationErrors = e.data;
             };
         },
+        attachImage(e) {
+            this.book.uploadImage = e.target.files[0];
+            this.imagePreview = null;
+            let reader = new FileReader();
+            reader.addEventListener('load', function() {
+                this.imagePreview = reader.result;
+            }.bind(this), false);
+            if (this.book.uploadImage) {
+                if ( /\.(jpe?g|png|gif)$/i.test(this.book.uploadImage.name) ) {
+                    reader.readAsDataURL(this.book.uploadImage);
+                } else {
+                    // this.validationErrors = {"errors":
+                    //     { "uploadImage":
+                    //         ["The upload image must be a file of type: png, jpg, jpeg, gif."]
+                    //     }
+                    // };
+                }
+            }
+        }
     }
 }
 </script>

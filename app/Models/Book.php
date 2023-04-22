@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-//use Elasticquent\ElasticquentTrait;
+use App\Traits\Searchable;
 
 class Book extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    
+    use SoftDeletes;
 
-    //use ElasticquentTrait;
+    use Searchable;
 
     protected $fillable = [
         'title',
@@ -20,21 +22,7 @@ class Book extends Model
         'genre',
         'isbn',
         'publisher',
-        'published_at'
-    ];
-
-    protected $mappingProperties = [
-        'title' => [
-            'type' => 'keyword'
-        ],
-        'author' => [
-            'type' => 'keyword'
-        ],
-        'genre' => [
-            'type' => 'keyword'
-        ],
-        'isbn' => [
-            'type' => 'keyword'
-        ]
+        'published_at',
+        'image'
     ];
 }

@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://127.0.0.1:8000",
             "description": "Demo API Server"
         }
     ],
@@ -182,16 +182,34 @@
                                         "type": "string",
                                         "example": "Books 1"
                                     },
+                                    "author": {
+                                        "type": "string",
+                                        "example": "Books Author"
+                                    },
+                                    "gener": {
+                                        "type": "string",
+                                        "example": "Books Genre"
+                                    },
                                     "description": {
                                         "type": "string",
                                         "example": "Description"
                                     },
-                                    "author": {
-                                        "type": "string",
-                                        "example": "Exmaple"
+                                    "isbn": {
+                                        "type": "number",
+                                        "example": "12345"
                                     },
-                                    "image": {
+                                    "publisher": {
                                         "type": "string",
+                                        "example": "Books Publisher"
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-04-01"
+                                    },
+                                    "uploadImage": {
+                                        "type": "string",
+                                        "format": "binary",
                                         "example": ""
                                     }
                                 },
@@ -210,15 +228,10 @@
                     "404": {
                         "description": "Resource Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
+                }
             }
         },
-        "/api/books/edit/{id}": {
+        "/api/books/show/{id}": {
             "get": {
                 "tags": [
                     "Books"
@@ -247,15 +260,10 @@
                     "404": {
                         "description": "Resource Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
+                }
             }
         },
-        "/api/books/update/{id}": {
+        "/api/books/{id}": {
             "put": {
                 "tags": [
                     "Books"
@@ -281,18 +289,36 @@
                                 "properties": {
                                     "title": {
                                         "type": "string",
-                                        "example": "Book"
+                                        "example": "Books 1"
+                                    },
+                                    "author": {
+                                        "type": "string",
+                                        "example": "Books Author"
+                                    },
+                                    "gener": {
+                                        "type": "string",
+                                        "example": "Books Genre"
                                     },
                                     "description": {
                                         "type": "string",
                                         "example": "Description"
                                     },
-                                    "author": {
-                                        "type": "string",
-                                        "example": "Example"
+                                    "isbn": {
+                                        "type": "number",
+                                        "example": "12345"
                                     },
-                                    "image": {
+                                    "publisher": {
                                         "type": "string",
+                                        "example": "Books Publisher"
+                                    },
+                                    "published_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-04-01"
+                                    },
+                                    "uploadImage": {
+                                        "type": "string",
+                                        "format": "binary",
                                         "example": ""
                                     }
                                 },
@@ -311,15 +337,8 @@
                     "404": {
                         "description": "Resource Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
-            }
-        },
-        "/api/books/delete/{id}": {
+                }
+            },
             "delete": {
                 "tags": [
                     "Books"
@@ -348,12 +367,7 @@
                     "404": {
                         "description": "Resource Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
+                }
             }
         },
         "/api/user": {
@@ -374,12 +388,7 @@
                     "404": {
                         "description": "Resource Not Found"
                     }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
+                }
             }
         }
     },

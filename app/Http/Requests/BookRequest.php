@@ -19,7 +19,7 @@ class BookRequest extends FormRequest
             'isbn'       => 'required|numeric',
             'publisher'       => 'required|max:255',
             'published_at' => 'required|date',
-            //'image'       => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
+            'uploadImage'       => 'nullable|image|mimes:png,jpg,jpeg,gif',
         ];
     }
 

@@ -6,25 +6,20 @@ use Illuminate\Support\Str;
 use App\Helpers\UploadHelper;
 use App\Interfaces\BookInterface;
 use App\Models\Book;
-use App\Models\User;
-use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Elasticsearch\Client;
+use Illuminate\Support\Arr;
 
 class BookRepository implements BookInterface
 {
-    /**
-     * Serach client
-     *
-     * @var bookRepository
-     */
-    public $client;
-    /**
-     * Constructor.
-     */
-    public function __construct()
+    /** @var \Elastic\Elasticsearch\Client */
+    private $elasticsearch;
+
+    public function __construct(Client $elasticsearch)
     {
-        $this->client = ClientBuilder::create()->setHosts(["http://127.0.0.1:9300"])->build();
+        $this->elasticsearch = $elasticsearch;
     }
 
     /**
@@ -33,41 +28,41 @@ class BookRepository implements BookInterface
      * @param int $pageNo
      * @return collections Array of Book Collection
      */
-    public function getPaginatedData($perPage): Paginator
+    public function getPaginatedData($perPage = 10): Paginator
     {
-        $perPage = isset($perPage) ? intval($perPage) : 10;
         return Book::orderBy('id', 'desc')
-            ->paginate($perPage);
+            ->paginate(intval($perPage));
     }
 
     /**
      * Get Searchable Book Data with Pagination.
      *
      * @param int $pageNo
+     * @param int $perPage
      * @return collections Array of Book Collection
      */
-    public function searchBook($keyword, $perPage): Paginator
+    public function search($keyword, $pageNo, $perPage)
     {
         $perPage = isset($perPage) ? intval($perPage) : 10;
 
         if(isset($keyword)) {
+            
+            if (config('services.search.enabled')) {
+                $items = $this->searchOnElasticsearch($keyword, $pageNo, $perPage);
+                $booksArr = $this->buildCollection($items);
+                return new LengthAwarePaginator(
+                    $booksArr,
+                    $items['total']['value'],
+                    $perPage,
+                    Paginator::resolveCurrentPage(),
+                    ['path' => Paginator::resolveCurrentPath()]
+                );
+            }     
             return Book::where('title', 'like', '%' . $keyword . '%')
-            ->orWhere('author', 'like', '%' . $keyword . '%')
-            ->orWhere('genre', 'like', '%' . $keyword . '%')
-            ->orWhere('isbn', 'like', '%' . $keyword . '%')
-            ->paginate($perPage);
-            // $params = [
-            //     'index' => 'bookstore',
-            //     'body'  => [
-            //         'query' => [
-            //             'match' => [
-            //                 'title' => $keyword,
-            //             ]
-            //         ]
-            //     ]
-            // ];
-            // $response = $this->client->search($params);
-            // return $response['hits']['hits'];
+                ->orWhere('author', 'like', '%' . $keyword . '%')
+                ->orWhere('genre', 'like', '%' . $keyword . '%')
+                ->orWhere('isbn', 'like', '%' . $keyword . '%')
+                ->paginate($perPage);
         } else {
             return Book::paginate($perPage);
         }
@@ -81,10 +76,10 @@ class BookRepository implements BookInterface
      */
     public function create(array $data): Book
     {
-        // if (!empty($data['image'])) {
-        //     $titleShort      = Str::slug(substr($data['title'], 0, 20));
-        //     $data['image'] = UploadHelper::upload('image', $data['image'], $titleShort . '-' . time(), 'images/books');
-        // }
+        if (!empty($data['uploadImage'])) {
+            $titleShort      = Str::slug(substr($data['title'], 0, 20));
+            $data['image'] = UploadHelper::upload('uploadImage', $data['uploadImage'], $titleShort . '-' . time(), 'images/books');
+        }
         $data['published_at'] = date('Y-m-d', strtotime($data['published_at']));
             
         return Book::create($data);
@@ -103,7 +98,7 @@ class BookRepository implements BookInterface
             return false;
         }
 
-        //UploadHelper::deleteFile('images/books/' . $book->image);
+        UploadHelper::deleteFile('images/books/' . $book->image);
         $book->delete($book);
         return true;
     }
@@ -129,12 +124,12 @@ class BookRepository implements BookInterface
     public function update(int $id, array $data): Book|null
     {
         $book = Book::find($id);
-        // if (!empty($data['image'])) {
-        //     $titleShort = Str::slug(substr($data['title'], 0, 20));
-        //     $data['image'] = UploadHelper::update('image', $data['image'], $titleShort . '-' . time(), 'images/books', $book->image);
-        // } else {
-        //     $data['image'] = $book->image;
-        // }
+        if (!empty($data['uploadImage'])) {
+            $titleShort = Str::slug(substr($data['title'], 0, 20));
+            $data['image'] = UploadHelper::update('uploadImage', $data['uploadImage'], $titleShort . '-' . time(), 'images/books', $book->image);
+        } else {
+            $data['image'] = $book->image;
+        }
 
         if (is_null($book)) {
             return null;
@@ -144,5 +139,38 @@ class BookRepository implements BookInterface
         $book->update($data);
 
         return $this->getByID($book->id);
+    }
+
+    private function searchOnElasticsearch(string $query = '', $pageNo, $perPage = 10): array
+    {
+        $model = new Book;
+        $from = ($pageNo > 1) ? (($pageNo - 1) * $perPage) : 0;
+        
+        $items = $this->elasticsearch->search([
+            'index' => $model->getSearchIndex(),
+            'type' => $model->getSearchType(),
+            'body' => [
+                "from" => $from,
+                "size" => $perPage,
+                'query' => [
+                    'query_string' => [
+                        'fields' => ['title', 'author', 'genre', 'isbn'],
+                        'query' => '*'.$query.'*',
+                    ],
+                ],
+            ],
+        ]);
+        
+        return $items['hits'];
+    }
+
+    private function buildCollection(array $items)
+    {
+        $ids = Arr::pluck($items['hits'], '_id');
+
+        return Book::findMany($ids)
+            ->sortBy(function ($book) use ($ids) {
+                return array_search($book->getKey(), $ids);
+            });
     }
 }
