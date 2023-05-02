@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\API\BookController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\BookController;
+use App\Http\Controllers\API\UserController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,11 +27,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/user', UserController::class);
 
-Route::group(['prefix' => 'books', 'middleware' => 'auth:sanctum'], function() {
-    Route::get('/', [BookController::class,'index']);
-    Route::post('add', [BookController::class,'store']);
-    Route::post('{id}', [BookController::class,'update']);
-    Route::get('show/{id}', [BookController::class,'show']);
-    Route::delete('{id}', [BookController::class,'destroy']);
+Route::group(['prefix' => 'books', 'middleware' => 'auth:sanctum'], function () {
+    Route::get('/', [BookController::class, 'index']);
+    Route::post('add', [BookController::class, 'store']);
+    Route::post('{id}', [BookController::class, 'update']);
+    Route::get('show/{id}', [BookController::class, 'show']);
+    Route::delete('{id}', [BookController::class, 'destroy']);
 });
-    

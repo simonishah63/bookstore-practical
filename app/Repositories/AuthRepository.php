@@ -12,7 +12,7 @@ class AuthRepository
         $data = [
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password'])
+            'password' => Hash::make($data['password']),
         ];
 
         return User::create($data);

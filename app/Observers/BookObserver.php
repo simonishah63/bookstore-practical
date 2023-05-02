@@ -14,11 +14,10 @@ class BookObserver
     {
         $this->elasticsearch = $elasticsearch;
     }
-    
+
     /**
      * Handle the Book "deleted" event.
      *
-     * @param  \App\Models\Book  $book
      * @return void
      */
     public function deleted(Book $book)
@@ -35,7 +34,6 @@ class BookObserver
     /**
      * Handle the Book "saved" event.
      *
-     * @param  \App\Models\Book  $book
      * @return void
      */
     public function saved(Book $book)

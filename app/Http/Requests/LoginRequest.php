@@ -2,26 +2,21 @@
 
 namespace App\Http\Requests;
 
-
 class LoginRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
         return [
-            'email'    => 'required',
+            'email' => 'required',
             'password' => 'required|min:6',
         ];
     }
 
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -30,13 +25,11 @@ class LoginRequest extends FormRequest
 
     /**
      * Custom validation message
-     *
-     * @return array
      */
     public function messages(): array
     {
         return [
-            'email.required'    => 'Email field is required',
+            'email.required' => 'Email field is required',
             'password.required' => 'Password field is required',
         ];
     }

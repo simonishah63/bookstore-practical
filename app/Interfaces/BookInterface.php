@@ -15,7 +15,6 @@ interface BookInterface
     /**
      * Create New Item
      *
-     * @param array $data
      * @return object Created Book
      */
     public function create(array $data);
@@ -23,7 +22,6 @@ interface BookInterface
     /**
      * Delete Item By Id
      *
-     * @param int $id
      * @return object Deleted Book
      */
     public function delete(int $id);
@@ -31,7 +29,6 @@ interface BookInterface
     /**
      * Get Item Details By ID
      *
-     * @param int $id
      * @return object Get Book
      */
     public function getByID(int $id);
@@ -39,8 +36,6 @@ interface BookInterface
     /**
      * Update Book By Id and Data
      *
-     * @param int $id
-     * @param array $data
      * @return object Updated Book Information
      */
     public function update(int $id, array $data);

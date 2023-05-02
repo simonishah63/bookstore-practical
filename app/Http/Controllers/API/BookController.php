@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\BookRequest;
-
 use App\Repositories\BookRepository;
 use App\Traits\ResponseTrait;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
@@ -16,10 +14,12 @@ use Illuminate\Http\Response;
  *     description="API Documentation - Bookstore",
  *     version="1.0.0",
  *     title="Bookstore API Documentation",
+ *
  *     @OA\Contact(
  *         email="simonishah63@gmail.com"
  *     ),
  * )
+ *
  * @OA\Server(
  *      url=L5_SWAGGER_CONST_HOST,
  *      description="Demo API Server"
@@ -30,10 +30,8 @@ use Illuminate\Http\Response;
  *     description="API Endpoints of bookstore Api"
  * )
  */
-
 class BookController extends Controller
 {
-    
     /**
      * Response trait to handle return responses.
      */
@@ -59,8 +57,10 @@ class BookController extends Controller
      *     summary="All Books - Publicly Accessible",
      *     description="All Books - Publicly Accessible",
      *     operationId="search",
+     *
      *     @OA\Parameter(name="perPage", description="perPage, eg; 20", example=20, in="query", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="search", description="search, eg; Test", example="Test", in="query", @OA\Schema(type="string")),
+     *
      *     @OA\Response(response=200, description="All Books - Publicly Accessible" ),
      *     @OA\Response(response=400, description="Bad request"),
      *     @OA\Response(response=404, description="Resource Not Found"),
@@ -70,6 +70,7 @@ class BookController extends Controller
     {
         try {
             $data = $this->bookRepository->search($request->search, $request->page, $request->perPage);
+
             return $this->responseSuccess($data, 'Books Fetched Successfully !');
         } catch (\Exception $e) {
             return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -83,9 +84,12 @@ class BookController extends Controller
      *     summary="Create New Book",
      *     description="Create New Book",
      *     operationId="store",
+     *
      *     @OA\RequestBody(
+     *
      *          @OA\JsonContent(
      *              type="object",
+     *
      *              @OA\Property(property="title", type="string", example="Books 1"),
      *              @OA\Property(property="author", type="string", example="Books Author"),
      *              @OA\Property(property="gener", type="string", example="Books Genre"),
@@ -96,6 +100,7 @@ class BookController extends Controller
      *              @OA\Property(property="uploadImage", type="string", format="binary", example=""),
      *          ),
      *      ),
+     *
      *      @OA\Response(response=200, description="Create New Book" ),
      *      @OA\Response(response=400, description="Bad request"),
      *      @OA\Response(response=404, description="Resource Not Found"),
@@ -106,6 +111,7 @@ class BookController extends Controller
         try {
             $book = $this->bookRepository->create($request->all());
             $book->published_at = date('Y-m-d', strtotime($book->published_at));
+
             return $this->responseSuccess($book, 'New Book Created Successfully !');
         } catch (\Exception $exception) {
             return $this->responseError(null, $exception->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -119,7 +125,9 @@ class BookController extends Controller
      *     summary="Show Book Details",
      *     description="Show Book Details",
      *     operationId="show",
+     *
      *     @OA\Parameter(name="id", description="id, eg; 1", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Show Book Details"),
      *     @OA\Response(response=400, description="Bad request"),
      *     @OA\Response(response=404, description="Resource Not Found"),
@@ -145,10 +153,14 @@ class BookController extends Controller
      *     tags={"Books"},
      *     summary="Update Book",
      *     description="Update Book",
+     *
      *     @OA\Parameter(name="id", description="id, eg; 1", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *     @OA\RequestBody(
+     *
      *          @OA\JsonContent(
      *              type="object",
+     *
      *              @OA\Property(property="title", type="string", example="Books 1"),
      *              @OA\Property(property="author", type="string", example="Books Author"),
      *              @OA\Property(property="gener", type="string", example="Books Genre"),
@@ -160,6 +172,7 @@ class BookController extends Controller
      *          ),
      *      ),
      *     operationId="update",
+     *
      *     @OA\Response(response=200, description="Update Book"),
      *     @OA\Response(response=400, description="Bad request"),
      *     @OA\Response(response=404, description="Resource Not Found"),
@@ -169,15 +182,15 @@ class BookController extends Controller
     {
         try {
             $data = $this->bookRepository->update($id, $request->all());
-            if (is_null($data))
+            if (is_null($data)) {
                 return $this->responseError(null, 'Book Not Found', Response::HTTP_NOT_FOUND);
+            }
 
             return $this->responseSuccess($data, 'Book Updated Successfully !');
         } catch (\Exception $e) {
             return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
 
     /**
      * @OA\DELETE(
@@ -186,7 +199,9 @@ class BookController extends Controller
      *     summary="Delete Book",
      *     description="Delete Book",
      *     operationId="destroy",
+     *
      *     @OA\Parameter(name="id", description="id, eg; 1", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *     @OA\Response(response=200, description="Delete Book"),
      *     @OA\Response(response=400, description="Bad request"),
      *     @OA\Response(response=404, description="Resource Not Found"),
@@ -195,13 +210,13 @@ class BookController extends Controller
     public function destroy($id)
     {
         try {
-            $book =  $this->bookRepository->getByID($id);
+            $book = $this->bookRepository->getByID($id);
             if (empty($book)) {
                 return $this->responseError(null, 'Book Not Found', Response::HTTP_NOT_FOUND);
             }
 
             $deleted = $this->bookRepository->delete($id);
-            if (!$deleted) {
+            if (! $deleted) {
                 return $this->responseError(null, 'Failed to delete the book.', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 

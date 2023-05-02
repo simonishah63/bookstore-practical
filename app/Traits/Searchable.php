@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Observers\BookObserver;
-use Elastic\Elasticsearch\Client;
 
 trait Searchable
 {

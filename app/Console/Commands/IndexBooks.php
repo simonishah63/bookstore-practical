@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use \App\Models\Book;
-use Illuminate\Console\Command;
+use App\Models\Book;
 use Elastic\Elasticsearch\ClientBuilder;
 use Exception;
-
+use Illuminate\Console\Command;
 
 class IndexBooks extends Command
 {
@@ -31,13 +30,14 @@ class IndexBooks extends Command
      */
     public function handle()
     {
-        $client = ClientBuilder::create()->setHosts(["http://127.0.0.1:9300"])->build();
-        
-        // $response = $client->indices()->delete([
-        //     'index' => 'bookstore'
-        // ]);
+        $client = ClientBuilder::create()->setHosts(['http://127.0.0.1:9300'])->build();
 
-        //print_r($response);exit;
+        $response = $client->indices()->delete([
+            'index' => 'books',
+        ]);
+
+        print_r($response);
+        exit;
         // Book::createIndex($shards = null, $replicas = null);
         // Book::putMapping($ignoreConflicts = true);
         //Book::getMapping();
@@ -48,32 +48,32 @@ class IndexBooks extends Command
             'body' => [
                 'settings' => [
                     'number_of_shards' => 1,
-                    'number_of_replicas' => 1
+                    'number_of_replicas' => 1,
                 ],
                 'mappings' => [
                     '_source' => [
-                        'enabled' => true
+                        'enabled' => true,
                     ],
                     'properties' => [
                         'title' => [
-                            'type' => 'text'
+                            'type' => 'text',
                         ],
                         'author' => [
-                            'type' => 'text'
+                            'type' => 'text',
                         ],
                         'genre' => [
-                            'type' => 'text'
+                            'type' => 'text',
                         ],
                         'isbn' => [
-                            'type' => 'text'
-                        ]
-                    ]
-                ]
-            ]
+                            'type' => 'text',
+                        ],
+                    ],
+                ],
+            ],
         ];
-        
+
         $response = $client->indices()->create($indexParams);
-    
+
         $books = Book::all();
 
         foreach ($books as $book) {
@@ -86,15 +86,14 @@ class IndexBooks extends Command
                         'author' => $book->author,
                         'genre' => $book->genre,
                         'isbn' => $book->isbn,
-                    ]
+                    ],
                 ]);
             } catch (Exception $e) {
                 $this->info($e->getMessage());
             }
         }
 
-        $this->info("Books were successfully indexed");
+        $this->info('Books were successfully indexed');
 
-        return;
     }
 }

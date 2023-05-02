@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Book;
 use Illuminate\Database\Seeder;
-use \App\Models\Book;
 
 class BooksTableSeeder extends Seeder
 {
@@ -16,8 +15,8 @@ class BooksTableSeeder extends Seeder
     public function run()
     {
         $response = json_decode(file_get_contents('https://fakerapi.it/api/v1/books?_quantity=999'), true);
-        if($response['status'] == 'OK') {
-            foreach($response['data'] as $book) {
+        if ($response['status'] == 'OK') {
+            foreach ($response['data'] as $book) {
                 Book::create([
                     'title' => $book['title'],
                     'author' => $book['author'],

@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
-use App\Repositories\AuthRepository;
-use App\Traits\ResponseTrait;
-use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Repositories\AuthRepository;
+use App\Traits\ResponseTrait;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-
-     /**
+    /**
      * Response trait to handle return responses.
      */
     use ResponseTrait;
@@ -37,25 +35,31 @@ class AuthController extends Controller
     {
         $this->authRepository = $authRepository;
     }
+
     /**
      * @OA\POST(
      *     path="/api/login",
      *     tags={"Authentication"},
      *     summary="Login",
      *     description="Login",
+     *
      *     @OA\RequestBody(
+     *
      *          @OA\JsonContent(
      *              type="object",
+     *
      *              @OA\Property(property="email", type="string", example="admin@example.com"),
      *              @OA\Property(property="password", type="string", example="Admin@123")
      *          ),
      *      ),
+     *
      *      @OA\Response(response=200, description="Login"),
      *      @OA\Response(response=400, description="Bad request"),
      *      @OA\Response(response=404, description="Resource Not Found")
      * )
      */
-    public function Login(LoginRequest $request) {
+    public function Login(LoginRequest $request)
+    {
 
         try {
             $credentials = $request->only('email', 'password');
@@ -66,11 +70,12 @@ class AuthController extends Controller
                     'access_token' => $token,
                     'token_type' => 'Bearer',
                 ];
+
                 return $this->responseSuccess($data, 'Logged In Successfully !');
             } else {
                 return $this->responseError(null, 'The provided credentials are incorrect.', Response::HTTP_UNAUTHORIZED);
             }
-        }  catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -81,15 +86,19 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Register User",
      *     description="Register New User",
+     *
      *     @OA\RequestBody(
+     *
      *          @OA\JsonContent(
      *              type="object",
+     *
      *              @OA\Property(property="name", type="string", example="Jhon Doe"),
      *              @OA\Property(property="email", type="string", example="jhondoe@example.com"),
      *              @OA\Property(property="password", type="string", example="123456"),
      *              @OA\Property(property="password_confirmation", type="string", example="123456")
      *          ),
      *      ),
+     *
      *      @OA\Response(response=200, description="Register New User Data" ),
      *      @OA\Response(response=400, description="Bad request"),
      *      @OA\Response(response=404, description="Resource Not Found")
@@ -98,7 +107,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         try {
-            $data =  $request->only('name', 'email', 'password', 'password_confirmation');
+            $data = $request->only('name', 'email', 'password', 'password_confirmation');
             $user = $this->authRepository->register($data);
             if ($user) {
                 event(new Registered($user));
@@ -107,6 +116,7 @@ class AuthController extends Controller
                     'access_token' => $token,
                     'token_type' => 'Bearer',
                 ];
+
                 return $this->responseSuccess($data, 'User Registered and Logged in Successfully', Response::HTTP_OK);
             }
         } catch (\Exception $e) {
@@ -120,18 +130,19 @@ class AuthController extends Controller
      *     tags={"Authentication"},
      *     summary="Logout",
      *     description="Logout",
+     *
      *     @OA\Response(response=200, description="Logout" ),
      *     @OA\Response(response=400, description="Bad request"),
      *     @OA\Response(response=404, description="Resource Not Found"),
      * )
      */
-    
     public function logout(Request $request)
     {
         try {
             $user = $request->user();
             $user->tokens()->delete();
             $this->guard()->logout();
+
             return $this->responseSuccess(null, 'Logged out successfully !');
         } catch (\Exception $e) {
             return $this->responseError(null, $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);

@@ -2,17 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\Searchable;
 
 class Book extends Model
 {
     use HasFactory;
-    
     use SoftDeletes;
-
     use Searchable;
 
     protected $fillable = [
@@ -23,6 +21,6 @@ class Book extends Model
         'isbn',
         'publisher',
         'published_at',
-        'image'
+        'image',
     ];
 }
